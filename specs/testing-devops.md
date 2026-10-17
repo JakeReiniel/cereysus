@@ -15,9 +15,14 @@ This spec covers development and validation surfaces in:
 - `scripts/`, `scripts/odysseus`, `scripts/_lib/cli.py`, `scripts/_completion/*`, `scripts/pr_blocker_audit.py`, and `scripts/odysseus-*`;
 - GPU helper scripts `scripts/check-docker-gpu.sh` and `scripts/check-docker-amd-gpu.sh`;
 - `.github/` templates, workflows, and description-check scripts;
+HEAD
 - contributor workflow docs in `CONTRIBUTING.md` and `website/pr-blocker-audit.md`;
 - platform launchers `launch-windows.ps1`, `launcher.py`, `Odysseus.spec`, `build-windows-portable.ps1`, `start-macos.sh`, `build-macos-app.sh`, and `update_windows.bat`;
 - setup/service files such as `setup.py`, `install-service.sh`, and `odysseus-ui.service`.
+- contributor workflow docs in `CONTRIBUTING.md` and `docs/pr-blocker-audit.md`;
+- platform launchers `launch-windows.ps1`, `launcher.py`, `Cereysus.spec`, `build-windows-portable.ps1`, `start-macos.sh`, `build-macos-app.sh`, and `update_windows.bat`;
+- setup/service files such as `setup.py`, `install-service.sh`, and `cereysus-ui.service`.
+batch/0-chat1
 
 ## Test Runtime
 
@@ -119,7 +124,7 @@ AMD helper behavior:
 Native platform launchers:
 
 - `launch-windows.ps1` requires Python 3.11+, creates `venv`, installs `requirements.txt`, runs `setup.py`, discovers per-user Git Bash installs where possible, warns when Git Bash is missing, and starts uvicorn on port 7000 by default.
-- `launcher.py`, `Odysseus.spec`, and `build-windows-portable.ps1` own the PyInstaller-style portable Windows launcher path, including app-root/data-dir differences covered by `src.runtime_paths`.
+- `launcher.py`, `Cereysus.spec`, and `build-windows-portable.ps1` own the PyInstaller-style portable Windows launcher path, including app-root/data-dir differences covered by `src.runtime_paths`.
 - `start-macos.sh` reads `.env`, defaults to port 7860 to avoid AirPlay conflicts, prefers Homebrew arm64 Python, installs/tolerates Homebrew Cookbook deps, handles Chroma package conflicts, starts ChromaDB for native runs, runs `setup.py`, and starts uvicorn.
 - `build-macos-app.sh` builds a launcher app around the existing repo venv and logs to `logs/odysseus-app.log`.
 - `update_windows.bat` owns the tested Windows Docker update flow.
