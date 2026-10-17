@@ -1,0 +1,303 @@
+# Cereysus rebrand map. Read by tools/rebrand/rebrand.py.
+#
+# Path policies: the FIRST matching entry wins.
+#   action freeze  T0 file: every hit is T0 and nothing is ever edited.
+#   action skip    Cereysus-owned file that names the old name on purpose: not counted, never edited.
+#   action text    standalone capitalised name in runtime text is renamed (tier T1, or T2 where noted).
+#                  Identifiers, URLs, headers, paths and source comments/docstrings are classified and kept.
+#   action hold    nothing is renamed; text hits are labelled with the entry's tier (R = owner review).
+# Optional flags: comments_text (code comments count as text: config templates and scripts),
+#                 docstrings_text (docstrings count as text: they are used as tool descriptions).
+# Explicit `rules` below still apply to any non-frozen file.
+#
+# Verified against upstream commit c74f475 (2026-10-16).
+
+verified_against: c74f475
+
+paths:
+  # ---- Tier 0: never touched ------------------------------------------------------------
+  - glob: [LICENSE, ACKNOWLEDGMENTS.md, THIRD_PARTY_PROVENANCE.json, "licenses/**"]
+    action: freeze
+    tier: T0
+    why: "Tier 0: licence, provenance and acknowledgments (ACKNOWLEDGMENTS.md is append-only)"
+  - glob: [NOTICE-CEREYSUS.md, "docs/cereysus/**", "tools/rebrand/**"]
+    action: skip
+    tier: T0
+    why: "Cereysus-owned file that names the upstream project on purpose (not counted, never edited)"
+
+  # ---- Owned by a later batch -----------------------------------------------------------
+  # Batch 0F removes the inherited code in these files (owner exclusion, DEC-12). Not touched
+  # here. Delete this entry when 0F has landed.
+  - glob: [services/search/core.py, src/constants.py, tests/test_review_20260923_fixes.py,
+           tests/test_service_search_provider_guards.py, tests/test_clawmm_r44_short_title.py,
+           tests/test_web_search_metadata_mode.py]
+    action: hold
+    tier: R
+    why: "Owned by Batch 0F (owner exclusion); not edited by 0B"
+  - glob: README.md
+    action: hold
+    tier: R
+    why: "README is rewritten by hand in Batches 0D and 0E; only the rules listed below touch it"
+
+  # ---- R: upstream voice, governance and engineering docs; left for owner review ----------
+  - glob: [CONTRIBUTING.md, ROADMAP.md, PUBLICATION_ASSET_DECISIONS.md]
+    action: hold
+    tier: R
+    why: "Upstream project governance and voice; flagged for owner review"
+  - glob: ["website/**", ".github/**"]
+    action: hold
+    tier: R
+    why: "Upstream public website, CI and issue templates; flagged for owner review"
+  - glob: ["docs/**", "plans/**", "specs/**"]
+    action: hold
+    tier: R
+    why: "Upstream engineering and operations documents; flagged for owner review"
+  - glob: ["integrations/**", companion/README.md]
+    action: hold
+    tier: R
+    why: "External-agent bundles and companion docs: skill ids and env vars are identifiers; flagged for owner review"
+  - glob: ["static/modal-control-variants.html", "static/wave-variants.html", "static/whirlpool-variants.html", "static/**/*.md"]
+    action: hold
+    tier: R
+    why: "Design-experiment pages and developer notes inside static/, not part of the app UI; flagged for owner review"
+
+  # ---- T2, left by DEC-1 -------------------------------------------------------------------
+  - glob: ["scripts/**"]
+    action: hold
+    tier: T2
+    why: "DEC-1: scripts/odysseus* command-line tools and helper scripts are left for now"
+  - glob: ["docker/**", "docker-compose*.yml", Dockerfile, .dockerignore, build-macos-app.sh, start-macos.sh]
+    action: hold
+    tier: T2
+    why: "Docker and macOS deployment files; not used on the owner's Windows PC and not in DEC-1"
+
+  # ---- T3: internal --------------------------------------------------------------------------
+  - glob: ["tests/**", "swift/**", package.json, package-lock.json, .gitignore, .gitattributes,
+           .gitleaks.toml, HARNESS_VERSION, "assets/**", "static/lib/**"]
+    action: hold
+    tier: T3
+    why: "Internal: test fixtures and assertions (changed only by explicit rules), package ids, vendored files"
+
+  # ---- T2, renamed by DEC-1 ------------------------------------------------------------------
+  - glob: [Odysseus.spec, Cereysus.spec]
+    action: text
+    tier: T2
+    comments_text: true
+    why: "DEC-1: PyInstaller spec"
+  - glob: [odysseus-ui.service, cereysus-ui.service, install-service.sh]
+    action: text
+    tier: T2
+    comments_text: true
+    why: "DEC-1: systemd service"
+  - glob: launcher.py
+    action: text
+    tier: T2
+    why: "DEC-1: launcher, tray and splash text (comments stay; the tray icon is redrawn in 0D)"
+  - glob: [launch-windows.ps1, update_windows.bat, build-windows-portable.ps1]
+    action: text
+    tier: T2
+    comments_text: true
+    why: "DEC-1: Windows launcher and console titles"
+
+  # ---- T1: user-visible text, renamed --------------------------------------------------------
+  - glob: [".env.example"]
+    action: text
+    tier: T1
+    comments_text: true
+    why: "Operator-facing configuration template"
+  - glob: ["mcp_servers/**"]
+    action: text
+    tier: T1
+    docstrings_text: true
+    why: "MCP tool descriptions (docstrings) are shown to agents and users"
+  - glob: [setup.py, SECURITY.md, THREAT_MODEL.md, app.py, "companion/**", "src/**", "routes/**", "core/**",
+           "services/**", "static/**", "frontend/**", "resources/**", "config/**"]
+    action: text
+    tier: T1
+    why: "User-visible text"
+
+  # ---- catch-all: anything new upstream that has no policy yet --------------------------------
+  - glob: "**"
+    action: hold
+    tier: R
+    why: "No path policy yet: review and add one to rebrand-map.yml"
+
+# Patterns that are never renamed, whatever the file. Matches that overlap a hit decide its tier.
+protect:
+  - re: '[\w.:/@-]*odysseus-dev[\w.:/@-]*'
+    tier: T0
+    kind: org-url
+    why: "Upstream GitHub organisation, image or site (Tier 0)"
+  - re: 'X-Odysseus-[A-Za-z0-9-]+'
+    tier: T3
+    kind: header
+    why: "HTTP/e-mail header name"
+  - re: '(?i)user-agent[^\n]{0,60}?Odysseus'
+    tier: T3
+    kind: wire-id
+    why: "User-Agent string sent to third parties"
+  - re: '-//Odysseus//'
+    tier: T3
+    kind: wire-id
+    why: "iCalendar PRODID"
+  - re: 'Reminder \(Odysseus\)'
+    tier: R
+    kind: marker
+    why: "Reminder e-mail subject; also a search key for the clean-up code, so renaming needs a dual-match shim (proposal P-1)"
+  - re: 'Odysseus email auto reply - account:'
+    tier: R
+    kind: marker
+    why: "Task description used as a lookup key for existing auto-reply tasks (proposal P-1)"
+
+# Whole lines that stay as they are.
+keep_lines:
+  - id: mlx-patch-payload
+    file: routes/cookbook_routes.py
+    re: '(utils_repl|dsv4_repl) = '
+    tier: T3
+    kind: patch-payload
+    why: "Text written into a third-party file by the MLX compatibility patch; also its already-patched check"
+  - id: homer-quote
+    file: static/js/slashCommands.js
+    re: 'son of Laertes'
+    tier: R
+    kind: quote
+    why: "Quotation from Homer's Odyssey; the name is the character's, not the product's"
+
+# Explicit edits. Each `find` is literal unless regex: true; `count` is the expected number of matches.
+# A rule whose text is gone but whose replacement is present counts as already applied (idempotent).
+rules:
+  # DEC-11: welcome tagline and tour closing line
+  - id: tagline
+    file: static/index.html
+    find: "A voyage begins."
+    replace: "Your companion for the journey ahead."
+    why: "DEC-11: welcome tagline (#welcome-sub default text)"
+  - id: tour-closing
+    file: static/js/slashCommands.js
+    find: "Odysseus is yours to explore, enjoy the voyage!"
+    replace: "Cereysus is yours to explore, enjoy the journey!"
+    why: "DEC-11: tour closing line"
+
+  # Built-in "Odysseus" character: a rewrite, not a rename. PROPOSED WORDING, awaiting owner approval.
+  # The character id stays `odysseus` (T3: it is stored in settings and tasks); only the label and prompt change.
+  - id: persona-intro
+    files: [static/js/presets.js, src/reminder_personas.py]
+    find: "You are Odysseus, king of Ithaca — subtle in counsel,"
+    replace: "You are Cereysus, a master builder and strategist — subtle in counsel,"
+    count: 1
+    why: "Proposed character rewrite (owner approval pending)"
+  - id: persona-voice
+    files: [static/js/presets.js, src/reminder_personas.py]
+    find: "ancient, noble, and composed,"
+    replace: "steady, noble, and composed,"
+    count: 1
+    why: "Proposed character rewrite (owner approval pending)"
+  - id: persona-backstory
+    files: [static/js/presets.js, src/reminder_personas.py]
+    find: "taken back his house by"
+    replace: "built something lasting by"
+    count: 1
+    why: "Proposed character rewrite (owner approval pending)"
+
+  # The agent should answer to its new name in the intent detectors that recognise the old one.
+  - id: name-alias-settings-intent
+    file: src/agent_loop.py
+    find: "application|odysseus|agent"
+    replace: "application|odysseus|cereysus|agent"
+    count: 2
+    why: "Recognise the new name as well as the old one in app-settings intent patterns"
+
+  # Service worker: header comment and cache version (forces a fresh app shell after the rebrand).
+  # Bump the `cy1` counter whenever Cereysus changes the precache list or the SW logic.
+  - id: sw-header
+    file: static/sw.js
+    find: "// static/sw.js — Odysseus PWA Service Worker"
+    replace: "// static/sw.js — Cereysus PWA Service Worker"
+    why: "Header comment named in the Development Prompt (6.3)"
+  - id: sw-cache-name
+    file: static/sw.js
+    regex: true
+    optional: true
+    find: "const CACHE_NAME = '(odysseus-v\\d+[^']*?)(?:-cy\\d+)?';"
+    replace: "const CACHE_NAME = '\\g<1>-cy1';"
+    why: "Bump CACHE_NAME so installed PWAs fetch the rebranded shell"
+
+  # README: the security paragraph is the only prose line 0B owns (the rest is 0D/0E).
+  - id: readme-security
+    file: README.md
+    find: "Odysseus is a self-hosted workspace with powerful local tools."
+    replace: "Cereysus is a self-hosted workspace with powerful local tools."
+    why: "Product statement in the README Security section"
+
+  # References to files renamed below (DEC-1) keep working everywhere.
+  - id: ref-spec
+    file: "**"
+    find: "Odysseus.spec"
+    replace: "Cereysus.spec"
+    count: any
+    optional: true
+    why: "Reference to the renamed PyInstaller spec"
+  - id: ref-service
+    file: "**"
+    find: "odysseus-ui.service"
+    replace: "cereysus-ui.service"
+    count: any
+    optional: true
+    why: "Reference to the renamed systemd unit"
+  - id: service-name
+    files: [odysseus-ui.service, cereysus-ui.service, install-service.sh]
+    regex: true
+    optional: true
+    find: '\bodysseus-ui\b'
+    replace: 'cereysus-ui'
+    count: any
+    why: "systemd unit name, install path and systemctl commands"
+
+  # Tests that assert text this tool renames. Everything else in tests/ is left as it is.
+  - id: test-you-are
+    files: [tests/test_clean_agent_preview.py, tests/test_context_compactor.py, tests/test_kv_cache_invalidation_2927.py]
+    find: "You are Odysseus."
+    replace: "You are Cereysus."
+    count: any
+    why: "Agent identity prompt"
+  - id: test-mcp-draft
+    file: tests/test_mcp_email_decode_header_spaces.py
+    find: "Created Odysseus email draft"
+    replace: "Created Cereysus email draft"
+    why: "MCP e-mail draft message"
+  - id: test-restart
+    file: tests/test_mcp_manager.py
+    find: "restart Odysseus"
+    replace: "restart Cereysus"
+    why: "MCP manager hint"
+  - id: test-oauth-client
+    file: tests/test_mcp_oauth.py
+    find: 'client_name == "Odysseus"'
+    replace: 'client_name == "Cereysus"'
+    why: "MCP OAuth client name"
+  - id: test-tui-tools
+    file: tests/test_minimal_native_tool_prompt.py
+    find: "Odysseus TUI workspace tools"
+    replace: "Cereysus TUI workspace tools"
+    why: "Agent prompt text"
+  - id: test-openrouter-title
+    file: tests/test_provider_endpoints_headers.py
+    find: '"X-OpenRouter-Title"] == "Odysseus"'
+    replace: '"X-OpenRouter-Title"] == "Cereysus"'
+    why: "App title sent to OpenRouter"
+  - id: test-outside
+    file: tests/test_shell_routes.py
+    find: "outside Odysseus"
+    replace: "outside Cereysus"
+    count: 2
+    why: "Cookbook status note"
+
+# Files renamed by DEC-1. Content edits are made first, then the file moves.
+renames:
+  - from: Odysseus.spec
+    to: Cereysus.spec
+    why: "DEC-1: PyInstaller spec"
+  - from: odysseus-ui.service
+    to: cereysus-ui.service
+    why: "DEC-1: systemd unit"

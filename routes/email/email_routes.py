@@ -5197,7 +5197,7 @@ def setup_email_routes():
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Failed to stage Odysseus attachment {kind}/{item_id}: {e}")
+            logger.error(f"Failed to stage Cereysus attachment {kind}/{item_id}: {e}")
             return {"success": False, "error": "Mail operation failed"}
 
     @router.post("/compose-from-odysseus-zip")
@@ -5249,7 +5249,7 @@ def setup_email_routes():
         except HTTPException:
             raise
         except Exception as e:
-            logger.error(f"Failed to stage Odysseus zip attachment: {e}")
+            logger.error(f"Failed to stage Cereysus zip attachment: {e}")
             return {"success": False, "error": "Mail operation failed"}
 
     @router.post("/compose-from-attachment/{uid}/{index}")
