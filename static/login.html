@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
 <title>Cereysus — Login</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 4L16 22L6 22Z' fill='%23e06c75'/%3E%3Cpath d='M16 8L16 22L24 22Z' fill='%23e06c75' opacity='0.6'/%3E%3Cpath d='M4 24Q10 20 16 24Q22 28 28 24' stroke='%23e06c75' stroke-width='2.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" sizes="192x192" href="static/icons/icon-192.png">
 <link rel="manifest" href="static/manifest.json">
-<link rel="apple-touch-icon" href="static/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="static/icons/apple-touch-icon-180.png">
 <script nonce="{{CSP_NONCE}}">
 (function(){
   function computeAppBasePath() {
@@ -74,6 +74,14 @@
         toggleActive:    '--toggle-active',
       };
       for (var k in ADV) { if (a[k]) s.setProperty(ADV[k], a[k]); }
+      // Brand colour: the advanced override, else the theme accent (as the app's early script does), so the
+      // Cereysus default in :root below only applies when no theme is saved.
+      if (!a.brandColor && c.red) s.setProperty('--brand-color', c.red);
+      // The button darkens the accent so white text clears 4.5:1; the light cyan accent of Cereysus Dark
+      // needs a stronger mix than the other themes.
+      var cyDark = t.name === 'cereysus-dark';
+      s.setProperty('--login-btn-mix', cyDark ? '66%' : '78%');
+      s.setProperty('--login-btn-hover-mix', cyDark ? '56%' : '66%');
     }
     // Background effect — pick ONE at random from the main app's 8
     // patterns each load (matches the old login behavior, but uses the
@@ -111,8 +119,9 @@
      localStorage — renders the login page in the same palette as the rest
      of the app instead of a different greys+offwhite scheme. */
   :root {
-    --bg: #282c34; --fg: #9cdef2; --panel: #111; --border: #355a66;
-    --red: #e06c75; --green: #50fa7b;
+    --bg: #1B1B3A; --fg: #E6E9F2; --panel: #252441; --border: #2E2D55;
+    --red: #2EC4CF; --green: #50fa7b; --brand-color: #C9A87C;
+    --login-btn-mix: 66%; --login-btn-hover-mix: 56%;
     --bg-effect-intensity: 1;
   }
   /* Background patterns — mirrors the main app "Background Patterns" styles
@@ -193,10 +202,10 @@
     border: none; border-radius: 6px;
     /* Darken the brand red slightly so #fff label text clears the WCAG AA
        4.5:1 contrast threshold (plain --red #e06c75 only reaches ~3.2:1). */
-    background: color-mix(in srgb, var(--red) 78%, #000); color: #fff; font-size: 1rem; cursor: pointer;
+    background: color-mix(in srgb, var(--red) var(--login-btn-mix, 78%), #000); color: #fff; font-size: 1rem; cursor: pointer;
     font-weight: 600; font-family: 'Fira Code', monospace;
   }
-  button:hover { background: color-mix(in srgb, var(--red) 66%, black); }
+  button:hover { background: color-mix(in srgb, var(--red) var(--login-btn-hover-mix, 66%), black); }
   button:disabled { opacity: 0.5; cursor: not-allowed; }
   .error { color: #e55; font-size: 0.85rem; margin-bottom: 0.75rem; display: none; }
 
@@ -275,7 +284,7 @@
 <body>
 <main class="card">
   <h1 class="logo">
-    <svg class="logo-boat" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 4L16 22L6 22Z" fill="currentColor"/><path d="M16 8L16 22L24 22Z" fill="currentColor" opacity="0.6"/><path d="M4 24Q10 20 16 24Q22 28 28 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg><span>Cereysus</span>
+    <img class="logo-boat" src="static/branding/cereysus-hardhat.svg" alt="" aria-hidden="true"><span>Cereysus</span>
   </h1>
   <p class="setup-note" id="setupNote" style="display:none"></p>
 

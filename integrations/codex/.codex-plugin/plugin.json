@@ -1,22 +1,22 @@
 {
   "name": "odysseus",
   "version": "0.1.1",
-  "description": "Connect Codex to a scoped Odysseus instance.",
+  "description": "Connect Codex to a scoped Cereysus instance.",
   "author": {
-    "name": "Odysseus"
+    "name": "Cereysus"
   },
   "skills": "./skills/",
   "interface": {
-    "displayName": "Odysseus",
-    "shortDescription": "Use scoped Odysseus tools from Codex.",
-    "longDescription": "Connects Codex terminal sessions to Odysseus through user-controlled scoped API tokens. Codex must use /api/codex/* endpoints so Odysseus Settings can enforce tool access.",
-    "developerName": "Odysseus",
+    "displayName": "Cereysus",
+    "shortDescription": "Use scoped Cereysus tools from Codex.",
+    "longDescription": "Connects Codex terminal sessions to Cereysus through user-controlled scoped API tokens. Codex must use /api/codex/* endpoints so Cereysus Settings can enforce tool access.",
+    "developerName": "Cereysus",
     "category": "Productivity",
     "capabilities": [
       "todos",
       "email",
       "scoped-api"
     ],
-    "defaultPrompt": "Use Odysseus only through configured scoped access. Check capabilities before reading or writing data."
+    "defaultPrompt": "Use Cereysus only through configured scoped access. Check capabilities before reading or writing data."
   }
 }

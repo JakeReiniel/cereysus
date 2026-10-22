@@ -27,7 +27,7 @@ def test_short_distinctive_paper_name_uses_exact_metadata_before_providers(
             "title": "Qwen2-VL: Enhancing Vision-Language Model Perception",
             "url": "https://arxiv.org/abs/2409.12191",
             "snippet": "Official paper.",
-            "source": "openalex",
+            "source": "arxiv",
         }] if title == "Qwen2-VL" else [],
     )
 

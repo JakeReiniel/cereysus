@@ -1178,7 +1178,7 @@ def selected_tools_for_request(message: str) -> frozenset[str] | None:
         # provider-specific markup (notably DeepSeek DSML) that cannot execute.
         web_lookup_fallback = True
     if re.search(
-        r"\buse\s+(?:the\s+)?(?:odysseus\s+)?web_search\b",
+        r"\buse\s+(?:the\s+)?(?:(?:odysseus|cereysus)\s+)?web_search\b",
         raw_text,
         re.I,
     ):
@@ -3734,7 +3734,7 @@ def required_read_operation_for_request(message: str, history: Iterable = ()) ->
             return RequiredReadOperation(tool, {"action": action} if action else {}, maximum)
     if re.fullmatch(
         _REQUEST_PREFIX + r"what\s+(?:mail|email)\s+accounts?\s+(?:are|r)\s+"
-        r"(?:hooked\s+up|connected|configured)(?:\s+to\s+odysseus)?[?!.]*",
+        r"(?:hooked\s+up|connected|configured)(?:\s+to\s+(?:odysseus|cereysus))?[?!.]*",
         text,
         re.I,
     ):

@@ -408,7 +408,6 @@ def test_scholarly_arxiv_fallback_prepends_only_strong_title_match(monkeypatch):
         return _Response()
 
     monkeypatch.setattr(core, "searxng_search_api", lambda *args, **kwargs: [])
-    monkeypatch.setattr(core, "_openalex_title_results", lambda *args, **kwargs: [])
     monkeypatch.setattr(core.httpx, "get", _fake_get)
     generic = [{
         "title": "ATTENTION | English meaning",
@@ -470,49 +469,6 @@ def test_explicit_arxiv_identifier_deduplicates_versions_and_urls():
     ]
 
 
-def test_explicit_arxiv_publication_query_prepends_formal_openalex_match(monkeypatch):
-    seen = []
-
-    def _fake_openalex(title, count):
-        seen.append((title, count))
-        return [
-            {
-                "title": (
-                    "Molmo and PixMo: Open Weights and Open Data for "
-                    "State-of-the-Art Vision-Language Models"
-                ),
-                "url": "https://doi.org/10.1109/cvpr52734.2025.00018",
-                "snippet": (
-                    "Exact scholarly-title match from OpenAlex metadata. "
-                    "Formal publication: 2025 IEEE/CVF Conference on Computer "
-                    "Vision and Pattern Recognition (CVPR), 2025."
-                ),
-                "source": "openalex",
-            },
-            {
-                "title": (
-                    "Molmo and PixMo: Open Weights and Open Data for "
-                    "State-of-the-Art Vision-Language Models"
-                ),
-                "url": "https://arxiv.org/abs/2409.17146",
-                "snippet": "Preprint record.",
-                "source": "openalex",
-            },
-        ]
-
-    monkeypatch.setattr(core, "_openalex_title_results", _fake_openalex)
-
-    results = core._augment_scholarly_results(
-        "Molmo and PixMo arXiv abs/2409.17146 published venue conference 2025",
-        [],
-        5,
-    )
-
-    assert seen == [("Molmo and PixMo", 3)]
-    assert results[0]["url"] == "https://doi.org/10.1109/cvpr52734.2025.00018"
-    assert results[1]["url"] == "https://arxiv.org/abs/2409.17146"
-
-
 def test_scholarly_fallback_prefers_exact_bare_title_search(monkeypatch):
     seen = []
 
@@ -547,84 +503,6 @@ def test_scholarly_fallback_prefers_exact_bare_title_search(monkeypatch):
     assert results[0]["url"] == "https://arxiv.org/abs/2408.03326"
 
 
-def test_openalex_title_fallback_returns_exact_arxiv_landing_page(monkeypatch):
-    class _Response:
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {
-                "results": [
-                    {
-                        "display_name": "LLaVA-OneVision: Easy Visual Task Transfer",
-                        "doi": "https://doi.org/10.48550/arxiv.2408.03326",
-                        "primary_location": {
-                            "landing_page_url": "http://arxiv.org/abs/2408.03326",
-                        },
-                    },
-                    {
-                        "display_name": "LLaVA: Large Language and Vision Assistant",
-                        "primary_location": {
-                            "landing_page_url": "https://arxiv.org/abs/2304.08485",
-                        },
-                    },
-                ],
-            }
-
-    monkeypatch.setattr(core.httpx, "get", lambda *args, **kwargs: _Response())
-
-    assert core._openalex_title_results(
-        "LLaVA-OneVision: Easy Visual Task Transfer",
-        3,
-    ) == [{
-        "title": "LLaVA-OneVision: Easy Visual Task Transfer",
-        "url": "https://arxiv.org/abs/2408.03326",
-        "snippet": "Exact scholarly-title match from OpenAlex metadata.",
-        "source": "openalex",
-    }]
-
-
-def test_openalex_title_result_exposes_formal_publication_metadata(monkeypatch):
-    class _Response:
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {
-                "results": [{
-                    "display_name": (
-                        "Molmo and PixMo: Open Weights and Open Data for "
-                        "State-of-the-Art Vision-Language Models"
-                    ),
-                    "doi": "https://doi.org/10.1109/cvpr52734.2025.00018",
-                    "publication_year": 2025,
-                    "type": "conference-paper",
-                    "primary_location": {
-                        "landing_page_url": (
-                            "https://doi.org/10.1109/cvpr52734.2025.00018"
-                        ),
-                        "raw_source_name": (
-                            "2025 IEEE/CVF Conference on Computer Vision and "
-                            "Pattern Recognition (CVPR)"
-                        ),
-                        "version": "publishedVersion",
-                        "is_published": True,
-                    },
-                }],
-            }
-
-    monkeypatch.setattr(core.httpx, "get", lambda *args, **kwargs: _Response())
-
-    result = core._openalex_title_results("Molmo and PixMo", 3)[0]
-
-    assert result["url"] == "https://doi.org/10.1109/cvpr52734.2025.00018"
-    assert result["snippet"] == (
-        "Exact scholarly-title match from OpenAlex metadata. Formal publication: "
-        "2025 IEEE/CVF Conference on Computer Vision and Pattern Recognition "
-        "(CVPR), 2025; type: conference-paper; version: publishedVersion."
-    )
-
-
 def test_named_paper_search_returns_exact_metadata_before_generic_providers(
     monkeypatch,
     tmp_path,
@@ -650,18 +528,11 @@ def test_named_paper_search_returns_exact_metadata_before_generic_providers(
     monkeypatch.setattr(
         core,
         "_arxiv_title_results",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            AssertionError("OpenAlex should resolve the title before arXiv fallback")
-        ),
-    )
-    monkeypatch.setattr(
-        core,
-        "_openalex_title_results",
         lambda title, count: [{
             "title": "LLaVA-OneVision: Easy Visual Task Transfer",
             "url": "https://arxiv.org/abs/2408.03326",
-            "snippet": "Exact scholarly-title match from OpenAlex metadata.",
-            "source": "openalex",
+            "snippet": "Exact scholarly-title match from arXiv metadata.",
+            "source": "arxiv",
         }] if title == "LLaVA-OneVision: Easy Visual Task Transfer" else [],
     )
 
@@ -701,7 +572,7 @@ def test_short_distinctive_paper_name_uses_exact_metadata_before_providers(
             "title": "Qwen2-VL: Enhancing Vision-Language Model Perception",
             "url": "https://arxiv.org/abs/2409.12191",
             "snippet": "Official paper.",
-            "source": "openalex",
+            "source": "arxiv",
         }] if title == "Qwen2-VL" else [],
     )
 

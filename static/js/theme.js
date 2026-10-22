@@ -9,6 +9,18 @@ import { makeWindowDraggable } from './windowDrag.js';
 import { snapModalToZone } from './tileManager.js?v=20260910responsivebounds1';
 
 export const THEMES = {
+  // Cereysus themes (owner palette, see docs/cereysus/THEMES.md). `text2` is the owner's secondary text
+  // colour: applyColors() publishes it as --cereysus-text2, which 00-tokens.css maps to the muted text token.
+  'cereysus-dark':  { bg:'#1B1B3A', fg:'#E6E9F2', panel:'#252441', border:'#2E2D55', red:'#2EC4CF', text2:'#B8BFCF',
+                      advanced: { userBubbleBg: '#141428', aiBubbleBg: '#252441', bubbleBorder: '#3A3968',
+                                  sidebarBg: '#141428', brandColor: '#C9A87C', brandMixTo: '#367BB9',
+                                  inputBorder: '#717092', sendBtnBg: '#0F7A85', sendBtnHover: '#367BB9',
+                                  toggleActive: '#0F7A85' } },
+  'cereysus-light': { bg:'#F3F3F3', fg:'#1A2B44', panel:'#FFFFFF', border:'#E5D1B8', red:'#3D5A80', text2:'#2C2C2C',
+                      advanced: { userBubbleBg: '#EAEAEA', aiBubbleBg: '#FFFFFF', bubbleBorder: '#D4C4A8',
+                                  sidebarBg: '#EAEAEA', brandColor: '#C6A680', brandMixTo: '#DDBB99',
+                                  inputBorder: '#8F8B83', sendBtnBg: '#3D5A80', sendBtnHover: '#314866',
+                                  toggleActive: '#3D5A80' } },
   dark:       { bg:'#282c34', fg:'#9cdef2', panel:'#111111', border:'#355a66', red:'#e06c75' },
   light:      { bg:'#f3f5f7', fg:'#26313a', panel:'#ffffff', border:'#cbd3da', red:'#b34d5c' },
   midnight:   { bg:'#0d1117', fg:'#c9d1d9', panel:'#161b22', border:'#30363d', red:'#f85149' },
@@ -34,8 +46,8 @@ export const THEMES = {
   yoyo:       { bg:'#211f23', fg:'#dfdbd7', panel:'#141415', border:'#3e5146', red:'#e09d6c' },
 };
 
-const DEFAULT_THEME = 'dark';
-const THEME_DISPLAY_NAMES = { ocean: 'starfield' };
+const DEFAULT_THEME = 'cereysus-dark';
+const THEME_DISPLAY_NAMES = { ocean: 'starfield', 'cereysus-dark': 'Cereysus Dark', 'cereysus-light': 'Cereysus Light' };
 const LS_KEY = 'odysseus-theme';
 const CUSTOM_THEMES_KEY = 'odysseus-custom-themes';
 
@@ -56,6 +68,8 @@ const MAX_CUSTOM_THEMES = 8;
 
 // Default background patterns for built-in themes
 const THEME_DEFAULT_PATTERN = {
+  'cereysus-dark':  'none',
+  'cereysus-light': 'none',
   dark:       'none',
   light:      'dots',
   midnight:   'rain',
@@ -77,6 +91,8 @@ const THEME_DEFAULT_PATTERN = {
 
 // Default effect colors for specific themes (overrides --fg)
 const THEME_DEFAULT_EFFECT_COLOR = {
+  'cereysus-dark':  '#C9A87C',
+  'cereysus-light': '#3D5A80',
   midnight:   '#ffffff',
   cyberpunk:  '#62c4c7',
   organs:     '#451616',
@@ -295,6 +311,10 @@ export function applyColors(colors) {
   s.setProperty('--panel', colors.panel);
   s.setProperty('--border', colors.border);
   if (colors.red) s.setProperty('--red', colors.red);
+  // Cereysus: the owner's secondary text colour. Only the Cereysus presets carry it; other themes
+  // clear it so the muted-text token falls back to its stylesheet default.
+  if (colors.text2) s.setProperty('--cereysus-text2', colors.text2);
+  else s.removeProperty('--cereysus-text2');
 
   // Keep the mobile browser toolbar / status bar matched to the theme bg
   // (same as the early head-script does on first paint).
@@ -327,7 +347,7 @@ export function applyColors(colors) {
 
 // Per-route SVG shape registry — kept in sync with the inline favicon
 // script in index.html so a theme change keeps the route icon, not the
-// default boat. Returns the inner SVG markup colored with `fg`.
+// default hard hat. Returns the inner SVG markup colored with `fg`.
 const _ROUTE_FAVICON_SHAPES = {
   '/calendar':
     "<rect x='4' y='6' width='24' height='22' rx='2' fill='none' stroke='__C__' stroke-width='2.5'/>" +
@@ -366,12 +386,10 @@ const _ROUTE_FAVICON_SHAPES = {
 function _updateFavicon(fg) {
   const path = (window.location.pathname || '').toLowerCase();
   const routeShape = _ROUTE_FAVICON_SHAPES[path];
-  let svg;
-  if (routeShape) {
-    svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>${routeShape.split('__C__').join(fg)}</svg>`;
-  } else {
-    svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M16 4L16 22L6 22Z' fill='${fg}'/><path d='M16 8L16 22L24 22Z' fill='${fg}' opacity='0.6'/><path d='M4 24Q10 20 16 24Q22 28 28 24' stroke='${fg}' stroke-width='2.5' fill='none' stroke-linecap='round'/></svg>`;
-  }
+  // Cereysus: the root route keeps the static hard-hat icon from index.html. It is a multi-tone raster
+  // icon, so it cannot be recoloured per theme; only the per-route line icons follow the accent.
+  if (!routeShape) return;
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>${routeShape.split('__C__').join(fg)}</svg>`;
   const href = 'data:image/svg+xml,' + encodeURIComponent(svg);
   let link = document.querySelector("link[rel='icon']");
   if (!link) {

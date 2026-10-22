@@ -825,16 +825,16 @@ function _watchSideNavCalendarPane() {
 // Quick-add hint examples — the placeholder cycles through these every few
 // seconds so users see different prompt shapes (events, deadlines, recurring).
 const _QA_HINT_EXAMPLES = [
-  'return home to Ithaca 1pm tmrw',
-  'dinner with Penelope Friday 8pm',
-  'coffee with Athena 9am Saturday',
-  'call Telemachus tomorrow morning',
+  'site visit at the bridge 1pm tmrw',
+  'dinner with Maria Friday 8pm',
+  'coffee with the surveyor 9am Saturday',
+  'call the contractor tomorrow morning',
   'dentist appointment 3pm next Tuesday',
-  'finish the wooden horse by Friday EOD',
+  'submit the structural drawings by Friday EOD',
   'gym 7am every weekday',
-  'flight to Athens Sunday 6:30am',
-  'crew muster 10am daily',
-  'council on Ithaca Monday 2pm',
+  'flight to Tokyo Sunday 6:30am',
+  'crew briefing 7am daily',
+  'design review Monday 2pm',
 ];
 function _initQuickAddHintCycle() {
   const span = document.getElementById('qa-hint-example');
@@ -1060,7 +1060,7 @@ function _headerHTML() {
       placeholder=" "
       autocomplete="off"
     />
-    <span class="cal-quickadd-hint" id="cal-quickadd-hint" aria-hidden="true"><span class="qa-hint-accent">+ Quick add</span><span class="qa-hint-separator">-</span><span class="qa-hint-example" id="qa-hint-example">return home to Ithaca 1pm tmrw</span><svg class="qa-hint-enter" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg></span>
+    <span class="cal-quickadd-hint" id="cal-quickadd-hint" aria-hidden="true"><span class="qa-hint-accent">+ Quick add</span><span class="qa-hint-separator">-</span><span class="qa-hint-example" id="qa-hint-example">site visit at the bridge 1pm tmrw</span><svg class="qa-hint-enter" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg></span>
     <span class="cal-quickadd-status" id="cal-quickadd-status"></span>
   </div>`;
 }

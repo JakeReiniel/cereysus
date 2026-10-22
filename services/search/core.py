@@ -13,7 +13,6 @@ from typing import Dict, Any, Optional, List, Set
 from urllib.parse import urlparse
 from src.constants import (
     ARXIV_API_URL,
-    OPENALEX_API_URL,
     SCHOLARLY_LOOKUP_TOTAL_BUDGET,
 )
 from src.search_passages import search_excerpt
@@ -373,10 +372,6 @@ _ARXIV_IDENTIFIER_RE = re.compile(
     r"(?i)(?:\barxiv\s*:\s*|\barxiv\.org/(?:abs|pdf|html)/)?"
     r"(?P<identifier>\d{4}\.\d{4,5}(?:v\d+)?)\b"
 )
-_FORMAL_PUBLICATION_CUE_RE = re.compile(
-    r"\b(?:publish(?:ed|ing|cation)?|venue|conference|journal|proceedings|doi)\b",
-    re.IGNORECASE,
-)
 
 
 def _exact_arxiv_identifier_results(query: str) -> list[dict]:
@@ -399,30 +394,6 @@ def _exact_arxiv_identifier_results(query: str) -> list[dict]:
             "source": "arxiv",
         })
     return results
-
-
-def _title_before_explicit_arxiv_identifier(query: str) -> str:
-    """Extract a probable title that precedes an explicit arXiv identifier."""
-
-    text = re.sub(r"\s+", " ", str(query or "")).strip()
-    match = _ARXIV_IDENTIFIER_RE.search(text)
-    if not match or not _FORMAL_PUBLICATION_CUE_RE.search(text):
-        return ""
-    candidate = text[:match.start()].strip(" \t,;:-'\"")
-    candidate = re.sub(
-        r"\barxiv(?:\.org)?(?:\s*:\s*|\s+(?:abs|pdf|html)\s*[/ :]*)?$",
-        "",
-        candidate,
-        flags=re.IGNORECASE,
-    ).strip(" \t,;:-'\"")
-    candidate = re.sub(
-        r"^(?:(?:please\s+)?(?:find|locate|search\s+for|look\s+up|verify|check)\s+)"
-        r"(?:(?:the|this)\s+)?(?:paper\s+)?",
-        "",
-        candidate,
-        flags=re.IGNORECASE,
-    ).strip(" \t,;:-'\"")
-    return candidate if len(_normalized_title_terms(candidate)) >= 2 else ""
 
 
 def _normalized_title_terms(value: str) -> list[str]:
@@ -626,70 +597,10 @@ def _arxiv_title_results(title: str, count: int = 3) -> list[dict]:
     return matches
 
 
-def _openalex_title_results(title: str, count: int = 3) -> list[dict]:
-    """Resolve an exact scholarly title through OpenAlex metadata."""
-
-    try:
-        # OpenAlex treats a literal question mark as query syntax and returns
-        # HTTP 400 for otherwise valid titles such as "How Far ... GPT-4V?".
-        search_title = re.sub(r"[?]+", " ", str(title or "")).strip()
-        response = _scholarly_api_get(
-            OPENALEX_API_URL,
-            {
-                "search": search_title,
-                "per-page": max(1, min(int(count), 5)),
-                "select": (
-                    "display_name,doi,primary_location,publication_year,type"
-                ),
-            },
-        )
-        if response is None:
-            return []
-        payload = response.json()
-    except Exception as exc:
-        logger.info("OpenAlex title lookup failed for %r: %s", title, exc)
-        return []
-
-    matches: list[dict] = []
-    for item in payload.get("results", []):
-        result_title = str(item.get("display_name") or "").strip()
-        if not _result_strongly_matches_title(title, {"title": result_title}):
-            continue
-        location = item.get("primary_location") or {}
-        url = str(location.get("landing_page_url") or item.get("doi") or "").strip()
-        if url.startswith("http://arxiv.org/"):
-            url = "https://" + url[len("http://"):]
-        if not url:
-            continue
-        snippet = "Exact scholarly-title match from OpenAlex metadata."
-        venue = str(location.get("raw_source_name") or "").strip()
-        year = item.get("publication_year")
-        publication_type = str(item.get("type") or "").strip()
-        version = str(location.get("version") or "").strip()
-        formal_parts: list[str] = []
-        if venue:
-            formal_parts.append(f"{venue}, {year}" if year else venue)
-        elif year:
-            formal_parts.append(str(year))
-        if publication_type:
-            formal_parts.append(f"type: {publication_type}")
-        if version:
-            formal_parts.append(f"version: {version}")
-        if formal_parts:
-            snippet += f" Formal publication: {'; '.join(formal_parts)}."
-        matches.append({
-            "title": result_title,
-            "url": url,
-            "snippet": snippet,
-            "source": "openalex",
-        })
-    return matches
-
-
 def _scholarly_title_results(title: str, count: int = 3) -> list[dict]:
     """Retry a noisy scholarly query as a bare title, then use arXiv API.
 
-    The three hops share one wall-clock budget so a slow upstream cannot hold a
+    The two hops share one wall-clock budget so a slow upstream cannot hold a
     user-facing search open for the sum of every per-request timeout.
     """
     with _scholarly_budget():
@@ -708,21 +619,15 @@ def _scholarly_title_results_inner(title: str, count: int) -> list[dict]:
     ]
     if exact:
         return exact[:count]
-    openalex = _openalex_title_results(title, count)
-    if openalex:
-        return openalex
     return _arxiv_title_results(title, count)
 
 
 def _direct_scholarly_title_results(title: str, count: int = 3) -> list[dict]:
     """Resolve a clear paper title without waiting on generic search providers."""
 
-    # OpenAlex typically resolves titles in under a second and often returns
-    # the official arXiv landing page. The arXiv API remains the fallback.
+    # The arXiv API resolves a clear paper title directly, without waiting on
+    # generic search providers.
     with _scholarly_budget():
-        openalex = _openalex_title_results(title, count)
-        if openalex:
-            return openalex
         return _arxiv_title_results(title, count)
 
 
@@ -732,22 +637,12 @@ def _augment_scholarly_results(query: str, results: list[dict], count: int) -> l
     current = list(results or [])
     identifier_results = _exact_arxiv_identifier_results(query)
     if identifier_results:
-        title = _title_before_explicit_arxiv_identifier(query)
-        formal_results: list[dict] = []
-        if title:
-            formal_results = [
-                item
-                for item in _openalex_title_results(title, min(count, 3))
-                if "arxiv.org/" not in str(item.get("url") or "").lower()
-            ]
         exact_urls = {str(item["url"]) for item in identifier_results}
-        formal_urls = {str(item.get("url") or "") for item in formal_results}
         return (
-            formal_results
-            + identifier_results
+            identifier_results
             + [
                 item for item in current
-                if str(item.get("url") or "") not in exact_urls | formal_urls
+                if str(item.get("url") or "") not in exact_urls
             ]
         )[:count]
     title = _scholarly_title_from_query(query)

@@ -311,7 +311,7 @@ def test_oauth_callback_expired_state_returns_dedicated_expired_page(monkeypatch
     assert resp.status_code == 400
     assert "Authorization Expired" in resp.text
     assert (
-        "This authorization round has expired. Press Reconnect in Odysseus and try again."
+        "This authorization round has expired. Press Reconnect in Cereysus and try again."
         in resp.text
     )
     # Ensure it did not return the bare 403 "Admin only"
@@ -446,7 +446,7 @@ def test_oauth_exchange_expired_generic_state_returns_expired_page(monkeypatch):
     assert resp.status_code == 400
     assert "Authorization Expired" in resp.text
     assert (
-        "This authorization round has expired. Press Reconnect in Odysseus and try again."
+        "This authorization round has expired. Press Reconnect in Cereysus and try again."
         in resp.text
     )
     assert "No OAuth config." not in resp.text

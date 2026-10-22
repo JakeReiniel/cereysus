@@ -22,7 +22,6 @@ from services.search import core as search_core
 from src.constants import (
     APP_VERSION,
     ARXIV_API_URL,
-    OPENALEX_API_URL,
     SCHOLARLY_LOOKUP_TIMEOUT,
 )
 from src.upload_limits import EDITOR_DRAFT_MAX_BYTES
@@ -44,26 +43,16 @@ def test_scholarly_endpoints_use_configured_constants(monkeypatch):
                 text = "<feed xmlns='http://www.w3.org/2005/Atom'></feed>"
 
             return FakeArxivResponse()
-        elif "openalex" in url:
-            class FakeOpenAlexResponse:
-                def json(self):
-                    return {"results": []}
-
-            return FakeOpenAlexResponse()
         return None
 
     monkeypatch.setattr(search_core, "_scholarly_api_get", fake_scholarly_api_get)
 
     custom_arxiv = "https://custom.arxiv.test/api/query"
-    custom_openalex = "https://custom.openalex.test/works"
     monkeypatch.setattr(search_core, "ARXIV_API_URL", custom_arxiv)
-    monkeypatch.setattr(search_core, "OPENALEX_API_URL", custom_openalex)
 
     search_core._arxiv_title_results("Attention Is All You Need")
-    search_core._openalex_title_results("Attention Is All You Need")
 
     assert custom_arxiv in requested_urls
-    assert custom_openalex in requested_urls
 
 
 def test_user_agent_tracks_app_version():
@@ -104,18 +93,18 @@ def test_redirect_to_prohibited_destination_is_blocked_and_never_requested(monke
         )
 
     def mock_check(url, **kwargs):
-        if url == OPENALEX_API_URL:
+        if url == ARXIV_API_URL:
             return (True, "")
         return real_check(url, **kwargs)
 
     monkeypatch.setattr(httpx, "get", fake_get)
     monkeypatch.setattr("src.url_safety.check_outbound_url", mock_check)
 
-    result = search_core._scholarly_api_get(OPENALEX_API_URL, {})
+    result = search_core._scholarly_api_get(ARXIV_API_URL, {})
 
     assert result is None
     # Only the initial allowed URL was contacted; the prohibited redirect destination was never requested
-    assert called_urls == [OPENALEX_API_URL]
+    assert called_urls == [ARXIV_API_URL]
 
 
 def test_redirect_to_link_local_metadata_is_blocked_and_never_requested(monkeypatch):
@@ -150,23 +139,23 @@ def test_redirect_to_link_local_metadata_is_blocked_and_never_requested(monkeypa
 def test_allowed_redirect_is_followed_safely(monkeypatch):
     """A safe redirect destination passing outbound checks is followed to completion."""
     called_urls = []
-    canonical_url = "https://api.openalex.org/canonical-works"
+    canonical_url = "https://export.arxiv.org/canonical-works"
 
     def fake_get(url, **kwargs):
         called_urls.append(url)
         req = httpx.Request("GET", url)
-        if url == OPENALEX_API_URL:
+        if url == ARXIV_API_URL:
             return httpx.Response(301, headers={"Location": "/canonical-works"}, request=req)
         return httpx.Response(200, json={"results": []}, request=req)
 
     monkeypatch.setattr(httpx, "get", fake_get)
     monkeypatch.setattr("src.url_safety.check_outbound_url", lambda url, **kw: (True, ""))
 
-    result = search_core._scholarly_api_get(OPENALEX_API_URL, {})
+    result = search_core._scholarly_api_get(ARXIV_API_URL, {})
 
     assert result is not None
     assert result.status_code == 200
-    assert called_urls == [OPENALEX_API_URL, canonical_url]
+    assert called_urls == [ARXIV_API_URL, canonical_url]
 
 
 def test_redirect_limit_is_bounded(monkeypatch):
@@ -202,7 +191,7 @@ def test_redirect_does_not_replay_query_parameters_to_the_new_destination(monkey
         req = httpx.Request("GET", httpx.URL(url, params=params or {}))
         if len(calls) == 1:
             return httpx.Response(
-                302, headers={"Location": "https://redirect.openalex.test/v2"}, request=req
+                302, headers={"Location": "https://redirect.arxiv.test/v2"}, request=req
             )
         return httpx.Response(200, json={"results": []}, request=req)
 
@@ -210,13 +199,13 @@ def test_redirect_does_not_replay_query_parameters_to_the_new_destination(monkey
     monkeypatch.setattr("src.url_safety.check_outbound_url", lambda url, **kw: (True, ""))
 
     result = search_core._scholarly_api_get(
-        OPENALEX_API_URL, {"search": "confidential-title"}
+        ARXIV_API_URL, {"search": "confidential-title"}
     )
 
     assert result is not None
     assert len(calls) == 2
     second_url, second_params = calls[1]
-    assert second_url == "https://redirect.openalex.test/v2"
+    assert second_url == "https://redirect.arxiv.test/v2"
     assert second_params is None
     assert "confidential-title" not in second_url
 
@@ -257,7 +246,6 @@ def test_http_error_status_degrades_to_no_results(monkeypatch):
     monkeypatch.setattr("src.url_safety.check_outbound_url", lambda url, **kw: (True, ""))
 
     assert search_core._arxiv_title_results("Attention Is All You Need") == []
-    assert search_core._openalex_title_results("Attention Is All You Need") == []
 
 
 def test_exhausted_budget_skips_the_request(monkeypatch):
@@ -272,7 +260,7 @@ def test_exhausted_budget_skips_the_request(monkeypatch):
 
     token = search_core._scholarly_deadline.set(time.monotonic() - 1)
     try:
-        assert search_core._scholarly_api_get(OPENALEX_API_URL, {}) is None
+        assert search_core._scholarly_api_get(ARXIV_API_URL, {}) is None
     finally:
         search_core._scholarly_deadline.reset(token)
     assert calls == []
@@ -314,7 +302,7 @@ def test_budget_is_shared_across_the_whole_chain(monkeypatch):
     )
     monkeypatch.setattr(
         search_core,
-        "_openalex_title_results",
+        "searxng_search_api",
         lambda title, count=3: observed.append(search_core._scholarly_deadline.get())
         or [],
     )
@@ -325,7 +313,7 @@ def test_budget_is_shared_across_the_whole_chain(monkeypatch):
         or [],
     )
 
-    search_core._direct_scholarly_title_results("a paper title")
+    search_core._scholarly_title_results("a paper title")
 
     assert len(observed) == 2
     assert observed[0] is not None

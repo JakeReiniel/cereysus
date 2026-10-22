@@ -153,7 +153,7 @@ function _autoReplyCalendarPayload(cfg, accountId = state._libAccountId) {
     dtstart: start,
     dtend: _addLocalCalendarDays(end, 1),
     all_day: true,
-    description: `Odysseus email auto reply - account:${String(accountId || '')}`,
+    description: `Cereysus email auto reply - account:${String(accountId || '')}`,
   };
 }
 
@@ -168,9 +168,13 @@ async function _findAutoReplyCalendarEventUids(cfg, accountId) {
     });
     if (!response.ok) return [];
     const data = await response.json().catch(() => ({}));
-    const marker = `Odysseus email auto reply - account:${String(accountId || '')}`;
+    // Events written before the rename carry the Odysseus marker; new ones carry the Cereysus marker.
+    const markers = [
+      `Cereysus email auto reply - account:${String(accountId || '')}`,
+      `Odysseus email auto reply - account:${String(accountId || '')}`,
+    ];
     return (data.events || [])
-      .filter(ev => String(ev?.description || '').startsWith(marker))
+      .filter(ev => markers.some(marker => String(ev?.description || '').startsWith(marker)))
       .map(ev => String(ev?.uid || '').trim())
       .filter(Boolean);
   } catch (_) {
