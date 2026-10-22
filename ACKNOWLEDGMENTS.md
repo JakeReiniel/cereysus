@@ -173,3 +173,10 @@ concerns from earlier are resolved:
 ## Thanks to
 
 - Friends, for helping me debug.
+
+---
+
+## Cereysus
+
+Cereysus is a modified version of Odysseus (https://github.com/odysseus-dev/odysseus). Everything above, including the
+third-party licenses and notices, continues to apply to it. See [NOTICE-CEREYSUS.md](NOTICE-CEREYSUS.md).

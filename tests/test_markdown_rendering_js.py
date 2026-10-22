@@ -173,9 +173,9 @@ def test_fenced_svg_renders_inline_in_a_locked_sandbox(node_available):
     assert 'sandbox=""' in html
     assert "Content-Security-Policy" in html
     assert "default-src &#39;none&#39;" in html
-    assert '--bg:#282c34' in html
-    assert '--panel:#111111' in html
-    assert '--accent:#e06c75' in html
+    assert '--bg:#1B1B3A' in html
+    assert '--panel:#252441' in html
+    assert '--accent:#2EC4CF' in html
     assert 'background:var(--bg)' in html
     assert 'title="Black hole formation"' in html
     assert 'style="aspect-ratio:1.5"' in html

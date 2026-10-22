@@ -33,11 +33,11 @@
 
 :root {
   /* Core palette */
-  --bg: #282c34;
-  --fg: #9cdef2;
-  --panel: #111;
-  --border: #355a66;
-  --red: #e06c75;
+  --bg: #1B1B3A;
+  --fg: #E6E9F2;
+  --panel: #252441;
+  --border: #2E2D55;
+  --red: #2EC4CF;
   /* Were `var(--green)` / `var(--warn)` — self-referential, so they
      resolved to invalid and every site fell back to its own literal
      (or, for sites with no fallback, painted as transparent/inherit).
@@ -65,7 +65,8 @@
   --color-danger: #c0392b;
   --color-recording: #ff3b30;
   --color-recording-hover: #d63031;
-  --color-muted: #888;
+  /* Cereysus: the owner's secondary text colour (--text2) when the active theme carries one. */
+  --color-muted: var(--cereysus-text2, #888);
   --color-muted-alt: #6b7280;
   --color-accent: #00aaff;
   --color-agent-active: #00ff00;
@@ -82,28 +83,6 @@
   /* Warm accent — used by the Goals/Today UI in Notes. Lives as a token so
      themes can override without touching the goal CSS. */
   --accent-warm: #d19a66;
-
-  /* Device safe areas (notch, Dynamic Island, home indicator) */
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  /* Full-height sheets start clear of the status-bar blur; flush when there is no inset */
-  --sheet-top: calc(var(--safe-top) + min(var(--safe-top), 24px));
-  --app-height: 100dvh;
-}
-/* The on-screen keyboard covers the home indicator */
-:root.keyboard-open { --safe-bottom: 0px; }
-/* iOS standalone web apps report dvh (and the viewport) short by the status bar
-   height; lvh still matches the screen. Body becomes the containing block for
-   fixed elements so overlays reach the real bottom edge as well. Containment
-   stops body's background reaching the canvas, so html paints it instead. */
-@media (display-mode: standalone) {
-  @supports (-webkit-touch-callout: none) {
-    :root { --app-height: 100lvh; }
-    html { height: var(--app-height); background-color: var(--bg); }
-    body { contain: layout; overflow: clip; }
-  }
 }
 
 :root.light {
@@ -143,12 +122,9 @@ body {
   font-family: var(--font-family, 'Fira Code', monospace);
   display: flex;
   height: 100%;
-  height: var(--app-height);
-  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  height: 100dvh; /* dynamic viewport height — adapts when mobile keyboard opens */
   overflow: hidden;
 }
-/* iOS keeps the full height when the keyboard opens; size the shell to what is visible */
-:root.keyboard-open body { height: var(--keyboard-viewport-height, var(--app-height)); }
 
 /* Self-hosted Fira Code font */
 @font-face { font-family: 'Fira Code'; font-weight: 300; font-style: normal; font-display: swap; src: url('/static/fonts/FiraCode-Light.woff2') format('woff2'); }

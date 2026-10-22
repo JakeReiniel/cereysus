@@ -10,9 +10,9 @@
 #                 docstrings_text (docstrings count as text: they are used as tool descriptions).
 # Explicit `rules` below still apply to any non-frozen file.
 #
-# Verified against upstream commit c74f475 (2026-10-16).
+# Verified against upstream commit 9712a54 (re-checked 2026-10-20).
 
-verified_against: c74f475
+verified_against: 9712a54
 
 paths:
   # ---- Tier 0: never touched ------------------------------------------------------------
@@ -25,41 +25,33 @@ paths:
     tier: T0
     why: "Cereysus-owned file that names the upstream project on purpose (not counted, never edited)"
 
-  # ---- Owned by a later batch -----------------------------------------------------------
-  # Batch 0F removes the inherited code in these files (owner exclusion, DEC-12). Not touched
-  # here. Delete this entry when 0F has landed.
-  - glob: [services/search/core.py, src/constants.py, tests/test_review_20260923_fixes.py,
-           tests/test_service_search_provider_guards.py, tests/test_clawmm_r44_short_title.py,
-           tests/test_web_search_metadata_mode.py]
-    action: hold
-    tier: R
-    why: "Owned by Batch 0F (owner exclusion); not edited by 0B"
+  # ---- Hand-edited files ----------------------------------------------------------------
   - glob: README.md
     action: hold
     tier: R
-    why: "README is rewritten by hand in Batches 0D and 0E; only the rules listed below touch it"
+    why: "README is edited by hand (Batches 0D and 0E); only the rules listed below touch it"
 
-  # ---- R: upstream voice, governance and engineering docs; left for owner review ----------
+  # ---- Q3 (owner, 2026-10-20): every former R group is rebranded, except the upstream website ---
+  - glob: ["website/**"]
+    action: hold
+    tier: R
+    why: "Q3 (owner): the upstream public website is left unchanged"
   - glob: [CONTRIBUTING.md, ROADMAP.md, PUBLICATION_ASSET_DECISIONS.md]
-    action: hold
-    tier: R
-    why: "Upstream project governance and voice; flagged for owner review"
-  - glob: ["website/**", ".github/**"]
-    action: hold
-    tier: R
-    why: "Upstream public website, CI and issue templates; flagged for owner review"
+    action: text
+    tier: T1
+    why: "Q3 (owner): rebranded; the upstream voice of the text is kept"
+  - glob: [".github/**"]
+    action: text
+    tier: T1
+    why: "Q3 (owner): rebranded; upstream org URLs stay (Tier 0)"
   - glob: ["docs/**", "plans/**", "specs/**"]
-    action: hold
-    tier: R
-    why: "Upstream engineering and operations documents; flagged for owner review"
+    action: text
+    tier: T1
+    why: "Q3 (owner): rebranded; file names and identifiers stay"
   - glob: ["integrations/**", companion/README.md]
-    action: hold
-    tier: R
-    why: "External-agent bundles and companion docs: skill ids and env vars are identifiers; flagged for owner review"
-  - glob: ["static/modal-control-variants.html", "static/wave-variants.html", "static/whirlpool-variants.html", "static/**/*.md"]
-    action: hold
-    tier: R
-    why: "Design-experiment pages and developer notes inside static/, not part of the app UI; flagged for owner review"
+    action: text
+    tier: T1
+    why: "Q3 (owner): rebranded; skill ids and env vars are identifiers and stay"
 
   # ---- T2, left by DEC-1 -------------------------------------------------------------------
   - glob: ["scripts/**"]
@@ -128,6 +120,14 @@ protect:
     tier: T0
     kind: org-url
     why: "Upstream GitHub organisation, image or site (Tier 0)"
+  - re: '/(?:home|Users)/[\w.-]+/(?:[\w.-]+/)*Odysseus(?:/[\w.-]+)*'
+    tier: T3
+    kind: path-or-url
+    why: "Local file-system path of an upstream developer's machine, quoted in an engineering document"
+  - re: 'Odysseus/\{APP_VERSION\}[^"\n]*'
+    tier: T3
+    kind: user-agent
+    why: "HTTP User-Agent product token sent to third-party APIs; kept like the other Odysseus/1.0 tokens"
   - re: 'X-Odysseus-[A-Za-z0-9-]+'
     tier: T3
     kind: header
@@ -141,13 +141,13 @@ protect:
     kind: wire-id
     why: "iCalendar PRODID"
   - re: 'Reminder \(Odysseus\)'
-    tier: R
+    tier: T3
     kind: marker
-    why: "Reminder e-mail subject; also a search key for the clean-up code, so renaming needs a dual-match shim (proposal P-1)"
+    why: "Legacy reminder e-mail subject, matched on purpose next to 'Reminder (Cereysus):' (P-1, dual match)"
   - re: 'Odysseus email auto reply - account:'
-    tier: R
+    tier: T3
     kind: marker
-    why: "Task description used as a lookup key for existing auto-reply tasks (proposal P-1)"
+    why: "Legacy auto-reply event marker, matched on purpose next to the Cereysus marker (P-1, dual match)"
 
 # Whole lines that stay as they are.
 keep_lines:
@@ -157,12 +157,6 @@ keep_lines:
     tier: T3
     kind: patch-payload
     why: "Text written into a third-party file by the MLX compatibility patch; also its already-patched check"
-  - id: homer-quote
-    file: static/js/slashCommands.js
-    re: 'son of Laertes'
-    tier: R
-    kind: quote
-    why: "Quotation from Homer's Odyssey; the name is the character's, not the product's"
 
 # Explicit edits. Each `find` is literal unless regex: true; `count` is the expected number of matches.
 # A rule whose text is gone but whose replacement is present counts as already applied (idempotent).
@@ -179,26 +173,30 @@ rules:
     replace: "Cereysus is yours to explore, enjoy the journey!"
     why: "DEC-11: tour closing line"
 
-  # Built-in "Odysseus" character: a rewrite, not a rename. PROPOSED WORDING, awaiting owner approval.
-  # The character id stays `odysseus` (T3: it is stored in settings and tasks); only the label and prompt change.
-  - id: persona-intro
-    files: [static/js/presets.js, src/reminder_personas.py]
-    find: "You are Odysseus, king of Ithaca — subtle in counsel,"
-    replace: "You are Cereysus, a master builder and strategist — subtle in counsel,"
+  # Built-in "Odysseus" character, rewritten as a civil engineer (Q4, owner, 2026-10-20).
+  # The character id stays `odysseus` (T3: it is stored in settings and tasks); only label and prompt change.
+  # Each pattern accepts the upstream text and the Batch 0B first draft, so it converts either.
+  - id: persona-prompt
+    file: static/js/presets.js
+    regex: true
+    optional: true
     count: 1
-    why: "Proposed character rewrite (owner approval pending)"
-  - id: persona-voice
-    files: [static/js/presets.js, src/reminder_personas.py]
-    find: "ancient, noble, and composed,"
-    replace: "steady, noble, and composed,"
+    find: 'prompt: "You are (?:Odysseus, king of Ithaca|Cereysus, a master builder and strategist) — subtle in counsel,[^"\n]*?(?:taken back his house|built something lasting) by wit, timing, and resolve\."'
+    replace: 'prompt: "You are Cereysus, a civil engineer: methodical, practical, and calm under load. You think in structures, systems, and tolerances, and you help people plan, design, build, and maintain things that last, from buildings, roads, and bridges to water systems and the budgets and schedules behind them. Your task is to give clear, buildable guidance, not mere performance. In every problem, first establish the objective, the constraints (site, budget, time, materials, regulations), the loads and risks, and the consequences of failure. Favor safety margins over false precision, simple robust solutions over fragile cleverness, and proven methods over untested novelty.\\n\\nWhen you respond, think like an engineer: What is the real requirement? What are the loads, the load paths, and the weakest link? What is known, unknown, assumed, and still to be verified? Which option meets the requirement at the lowest lifetime cost and risk? What happens if the first assumption is wrong, and how will it be checked?\\n\\nGive guidance in a voice that is steady, plain-spoken, and precise, yet easy for non-engineers to follow. State your assumptions and units. Show your reasoning and your checks. Compare options, judge tradeoffs, and recommend a course with contingencies. If needed, ask a few focused questions before advising. Be thorough but not padded, and wise but not vague. For safety-critical decisions, defer to licensed professionals, local codes, and site investigation, and say so when it matters. Speak as one who has seen what fails, learned from it, and built things that stand."'
+    why: "Q4 (owner): the built-in Cereysus character is a civil engineer"
+  - id: persona-reminder
+    file: src/reminder_personas.py
+    regex: true
+    optional: true
     count: 1
-    why: "Proposed character rewrite (owner approval pending)"
-  - id: persona-backstory
-    files: [static/js/presets.js, src/reminder_personas.py]
-    find: "taken back his house by"
-    replace: "built something lasting by"
-    count: 1
-    why: "Proposed character rewrite (owner approval pending)"
+    find: '(?s)"You are (?:Odysseus, king of Ithaca|Cereysus, a master builder and strategist) — subtle in counsel, disciplined in "\n.*?resolve\."'
+    replace: |-
+      "You are Cereysus, a civil engineer: methodical, practical, and calm under "
+              "load. Speak in a voice that is steady, plain-spoken, and precise, yet "
+              "easy for non-engineers to follow. Be exact but not stiff. Be clear but "
+              "not vague. Speak as one who has seen what fails and built things that "
+              "stand."
+    why: "Q4 (owner): the reminder voice of the built-in character"
 
   # The agent should answer to its new name in the intent detectors that recognise the old one.
   - id: name-alias-settings-intent
@@ -207,6 +205,117 @@ rules:
     replace: "application|odysseus|cereysus|agent"
     count: 2
     why: "Recognise the new name as well as the old one in app-settings intent patterns"
+
+  # P-2 (owner-approved 2026-10-20): the other intent patterns that recognise the old name accept the new one too.
+  - id: p2-web-search-intent
+    file: src/turn_contract.py
+    find: '(?:odysseus\s+)?web_search'
+    replace: '(?:(?:odysseus|cereysus)\s+)?web_search'
+    count: 1
+    why: "P-2: 'use cereysus web_search' is recognised like 'use odysseus web_search'"
+  - id: p2-connected-intent
+    file: src/turn_contract.py
+    find: '(?:\s+to\s+odysseus)?'
+    replace: '(?:\s+to\s+(?:odysseus|cereysus))?'
+    count: 1
+    why: "P-2: 'connected to cereysus' is recognised like 'connected to odysseus'"
+
+  # Q6 (owner, 2026-10-20): the closing line never showed. Upstream wires the last step's 'finish tour'
+  # button to the same cancel path as 'skip tour', and that path returns before the closing line.
+  - id: tour-finish-closing
+    file: static/js/slashCommands.js
+    find: "if (res === 'cancel') { _clearTour(); return true; }"
+    replace: "if (res === 'cancel') { _clearTour(); if (step.finishLabel) { await typewriterReply('Cereysus is yours to explore, enjoy the journey!'); } return true; }"
+    count: 1
+    why: "Q6: 'finish tour' ends with the closing line; 'skip tour' stays silent as upstream"
+
+  # Q5 (owner, 2026-10-20): Odyssey-themed copy is rewritten for Cereysus.
+  # "Nobody mode" becomes "Incognito mode": upstream already names the ids, the CSS and the session "Incognito",
+  # and the server and the sidebar already recognise both session names.
+  - id: q5-nobody-mode
+    files: [static/app.js, static/index.html, static/js/sessions.js, static/js/slashCommands.js]
+    find: "Nobody mode"
+    replace: "Incognito mode"
+    count: any
+    why: "Q5: user-visible feature name"
+  - id: q5-nobody-label
+    files: [static/app.js, static/index.html]
+    find: '<span class="incognito-label">Nobody</span>'
+    replace: '<span class="incognito-label">Incognito</span>'
+    count: any
+    why: "Q5: toggle label (two in app.js, one in index.html)"
+  - id: q5-incognito-session-name
+    file: static/js/sessions.js
+    find: "isIncognito ? 'Nobody' :"
+    replace: "isIncognito ? 'Incognito' :"
+    count: 1
+    why: "Q5: new private sessions get the name the server and the sidebar already recognise"
+  - id: q5-qa-hints
+    file: static/js/calendar.js
+    regex: true
+    optional: true
+    count: 1
+    find: '(?s)const _QA_HINT_EXAMPLES = \[\n.*?\n\];'
+    replace: |-
+      const _QA_HINT_EXAMPLES = [
+        'site visit at the bridge 1pm tmrw',
+        'dinner with Maria Friday 8pm',
+        'coffee with the surveyor 9am Saturday',
+        'call the contractor tomorrow morning',
+        'dentist appointment 3pm next Tuesday',
+        'submit the structural drawings by Friday EOD',
+        'gym 7am every weekday',
+        'flight to Tokyo Sunday 6:30am',
+        'crew briefing 7am daily',
+        'design review Monday 2pm',
+      ];
+    why: "Q5: quick-add examples without the epic's names"
+  - id: q5-qa-hint-static
+    file: static/js/calendar.js
+    find: 'id="qa-hint-example">return home to Ithaca 1pm tmrw</span>'
+    replace: 'id="qa-hint-example">site visit at the bridge 1pm tmrw</span>'
+    count: 1
+    why: "Q5: first quick-add hint shown before the cycle starts"
+  - id: q5-research-placeholder
+    file: static/js/research/panel.js
+    regex: true
+    optional: true
+    count: 1
+    find: 'Set sail on a question — (?:Odysseus|Cereysus) will chart the course\.'
+    replace: 'Ask a question — Cereysus will plan the research and report back.'
+    why: "Q5: Deep Research placeholder"
+  - id: q5-odyssey-quotes
+    file: static/js/slashCommands.js
+    regex: true
+    optional: true
+    count: 1
+    find: '(?s)const _ODYSSEY_QUOTES = \[\n.*?\n\];'
+    replace: |-
+      const _ODYSSEY_QUOTES = [
+        "Measure twice, pour once.",
+        "A structure is only as strong as its weakest connection.",
+        "Every great span begins with one well-placed footing.",
+        "Good engineering is invisible until the day it is needed.",
+        "Gravity never takes a day off, so design for it every day.",
+        "Safety factors are how we plan for what we cannot predict.",
+        "Build it simple, build it strong, build it to last.",
+        "A mistake on paper costs pennies; a mistake in concrete costs fortunes.",
+        "Check the load path, then check it again.",
+        "The best bridge is the one nobody has to worry about.",
+      ];
+    why: "Q5: hidden /odyssey command shows original engineering lines instead of quotations from the epic"
+  - id: q5-odyssey-attribution
+    file: static/js/slashCommands.js
+    find: "Homer, The Odyssey"
+    replace: "Cereysus, civil engineer"
+    count: 1
+    why: "Q5: attribution line of the hidden command"
+  - id: q5-odyssey-alias
+    file: static/js/slashCommands.js
+    find: "odyssey: { alias: ['homer','quote'],hidden: true,"
+    replace: "odyssey: { alias: ['blueprint','quote'],hidden: true,"
+    count: 1
+    why: "Q5: the hidden command also answers to /blueprint (the old /odyssey name keeps working)"
 
   # Service worker: header comment and cache version (forces a fresh app shell after the rebrand).
   # Bump the `cy1` counter whenever Cereysus changes the precache list or the SW logic.
@@ -220,7 +329,7 @@ rules:
     regex: true
     optional: true
     find: "const CACHE_NAME = '(odysseus-v\\d+[^']*?)(?:-cy\\d+)?';"
-    replace: "const CACHE_NAME = '\\g<1>-cy1';"
+    replace: "const CACHE_NAME = '\\g<1>-cy2';"
     why: "Bump CACHE_NAME so installed PWAs fetch the rebranded shell"
 
   # README: the security paragraph is the only prose line 0B owns (the rest is 0D/0E).
@@ -276,6 +385,24 @@ rules:
     find: 'client_name == "Odysseus"'
     replace: 'client_name == "Cereysus"'
     why: "MCP OAuth client name"
+  - id: test-issue-revision-label
+    file: tests/test_issue_description_check.py
+    find: "Odysseus Revision"
+    replace: "Cereysus Revision"
+    count: any
+    why: "Q3: the bug template and its description checker (.github) now say Cereysus Revision"
+  - id: test-publication-icons
+    file: tests/test_publication_plan_b.py
+    find: '"purpose": "any maskable"}'
+    replace: '"purpose": "any"}'
+    count: 2
+    why: "0D: the 192 and 512 manifest icons are purpose any; only the dedicated file is maskable"
+  - id: test-mcp-oauth-expired
+    file: tests/test_mcp_oauth.py
+    find: "Press Reconnect in Odysseus and try again."
+    replace: "Press Reconnect in Cereysus and try again."
+    count: 2
+    why: "MCP OAuth expired-page text (routes/mcp/mcp_routes.py is renamed by the generic rule)"
   - id: test-tui-tools
     file: tests/test_minimal_native_tool_prompt.py
     find: "Odysseus TUI workspace tools"

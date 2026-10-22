@@ -130,7 +130,7 @@ Compose preserves retained SearXNG settings but runs `scripts/migrate_searxng_se
 
 ## Query Repair And Extractive Observations
 
-`services/search/core.py` normalizes conversational provider queries, filters low-relevance results, respects explicit site scope, retries bounded broadened queries after empty results, and reapplies relevance/ranking on cache hits. Completed empty provider responses advance through the chain instead of repeating the same request as if it were a transport error. Named scholarly work lookup can use arXiv/OpenAlex metadata before generic search, and exact arXiv identifiers have a direct source path.
+`services/search/core.py` normalizes conversational provider queries, filters low-relevance results, respects explicit site scope, retries bounded broadened queries after empty results, and reapplies relevance/ranking on cache hits. Completed empty provider responses advance through the chain instead of repeating the same request as if it were a transport error. Named scholarly work lookup can use arXiv metadata before generic search, and exact arXiv identifiers have a direct source path.
 
 `src/search_intent.py` distinguishes requested publication windows from current reference information: current documentation/configuration alone does not imply recently published pages. `src/search_passages.py` owns literal, query-relevant excerpts and balanced bounded search observations across fetched sources, preserving explicit omission markers and source headers rather than prefix-truncating away later sources. These are extractive observations, not generated source claims. Deep research shares provider primitives through its navigator but retains its own result and failure shapes.
 

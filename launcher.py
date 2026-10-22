@@ -48,21 +48,30 @@ if getattr(sys, 'frozen', False):
             splash_root = tk.Tk()
             splash_root.title("Cereysus")
             splash_root.overrideredirect(True)
-            splash_root.configure(bg="#1a1c23")
+            splash_root.configure(bg="#1B1B3A")
 
             # Accented borders
-            splash_root.config(highlightbackground="#e06c75", highlightcolor="#e06c75", highlightthickness=1)
+            splash_root.config(highlightbackground="#C9A87C", highlightcolor="#C9A87C", highlightthickness=1)
 
-            w, h = 360, 160
+            w, h = 360, 230
             ws = splash_root.winfo_screenwidth()
             hs = splash_root.winfo_screenheight()
             x = (ws - w) // 2
             y = (hs - h) // 2
             splash_root.geometry(f"{w}x{h}+{x}+{y}")
 
-            tk.Label(splash_root, text="⛵ Cereysus", font=("Segoe UI", 22, "bold"), bg="#1a1c23", fg="#e06c75").pack(pady=(22, 2))
-            tk.Label(splash_root, text="Launching background services...", font=("Segoe UI", 10), bg="#1a1c23", fg="#d1d4e0").pack(pady=2)
-            tk.Label(splash_root, text="Please wait, this will take a few seconds.", font=("Segoe UI", 8, "italic"), bg="#1a1c23", fg="#5c6370").pack(pady=(12, 0))
+            # Hard-hat icon: the 192 px app icon shown at 64 px. The splash still works without it.
+            try:
+                hat_path = os.path.join(getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__))), "static", "icons", "icon-192.png")
+                hat = tk.PhotoImage(file=hat_path).subsample(3, 3)
+                hat_label = tk.Label(splash_root, image=hat, bg="#1B1B3A")
+                hat_label.image = hat  # keep a reference so Tk does not discard the image
+                hat_label.pack(pady=(16, 0))
+            except Exception:
+                pass
+            tk.Label(splash_root, text="Cereysus", font=("Segoe UI", 22, "bold"), bg="#1B1B3A", fg="#C9A87C").pack(pady=(4, 2))
+            tk.Label(splash_root, text="Launching background services...", font=("Segoe UI", 10), bg="#1B1B3A", fg="#E6E9F2").pack(pady=2)
+            tk.Label(splash_root, text="Please wait, this will take a few seconds.", font=("Segoe UI", 8, "italic"), bg="#1B1B3A", fg="#B8BFCF").pack(pady=(12, 0))
 
             splash_root.attributes("-topmost", True)
             splash_root.mainloop()
@@ -74,17 +83,22 @@ if getattr(sys, 'frozen', False):
 
 
 def create_tray_image():
-    # Generate a beautiful 64x64 icon matching Odysseus brand red accent (#e06c75)
+    # Cereysus hard hat: reuse the 192 px app icon shipped in static/icons, resized to 64x64.
+    # If the file cannot be read, draw a simple hard hat in the brand tan instead.
     from PIL import Image, ImageDraw
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    try:
+        resample = getattr(Image, "Resampling", Image).LANCZOS
+        return Image.open(os.path.join(base, "static", "icons", "icon-192.png")).convert("RGBA").resize((64, 64), resample)
+    except Exception:
+        pass
     image = Image.new('RGBA', (64, 64), (0, 0, 0, 0))
     dc = ImageDraw.Draw(image)
-    accent_red = (224, 108, 117, 255)
-    light_red = (224, 108, 117, 150)
-
-    # Draw premium sailing boat
-    dc.polygon([(32, 10), (32, 45), (12, 45)], fill=accent_red)
-    dc.polygon([(32, 18), (32, 45), (48, 45)], fill=light_red)
-    dc.polygon([(8, 48), (56, 48), (44, 56), (20, 56)], fill=accent_red)
+    tan = (201, 168, 124, 255)
+    shade = (166, 131, 88, 255)
+    dc.pieslice([10, 14, 54, 58], 180, 360, fill=tan)          # dome
+    dc.rectangle([29, 14, 35, 36], fill=shade)                  # ridge
+    dc.rounded_rectangle([6, 36, 58, 44], radius=4, fill=tan)   # brim
     return image
 
 

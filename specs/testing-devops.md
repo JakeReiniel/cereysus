@@ -15,14 +15,9 @@ This spec covers development and validation surfaces in:
 - `scripts/`, `scripts/odysseus`, `scripts/_lib/cli.py`, `scripts/_completion/*`, `scripts/pr_blocker_audit.py`, and `scripts/odysseus-*`;
 - GPU helper scripts `scripts/check-docker-gpu.sh` and `scripts/check-docker-amd-gpu.sh`;
 - `.github/` templates, workflows, and description-check scripts;
-HEAD
 - contributor workflow docs in `CONTRIBUTING.md` and `website/pr-blocker-audit.md`;
-- platform launchers `launch-windows.ps1`, `launcher.py`, `Odysseus.spec`, `build-windows-portable.ps1`, `start-macos.sh`, `build-macos-app.sh`, and `update_windows.bat`;
-- setup/service files such as `setup.py`, `install-service.sh`, and `odysseus-ui.service`.
-- contributor workflow docs in `CONTRIBUTING.md` and `docs/pr-blocker-audit.md`;
 - platform launchers `launch-windows.ps1`, `launcher.py`, `Cereysus.spec`, `build-windows-portable.ps1`, `start-macos.sh`, `build-macos-app.sh`, and `update_windows.bat`;
 - setup/service files such as `setup.py`, `install-service.sh`, and `cereysus-ui.service`.
-batch/0-chat1
 
 ## Test Runtime
 
@@ -92,7 +87,7 @@ docker compose ps
 docker compose logs --tail=120 odysseus
 ```
 
-`docker-compose.yml` starts Odysseus, ChromaDB, SearXNG, and ntfy. It binds services to loopback by default through `APP_BIND`, `CHROMADB_BIND`, and `NTFY_BIND`, persists configurable `APP_DATA_DIR`/`APP_LOGS_DIR`, SSH identity, HuggingFace cache, and user-local Python installs, and gives the Odysseus container host-loopback reachability through `host.docker.internal`.
+`docker-compose.yml` starts Cereysus, ChromaDB, SearXNG, and ntfy. It binds services to loopback by default through `APP_BIND`, `CHROMADB_BIND`, and `NTFY_BIND`, persists configurable `APP_DATA_DIR`/`APP_LOGS_DIR`, SSH identity, HuggingFace cache, and user-local Python installs, and gives the Cereysus container host-loopback reachability through `host.docker.internal`.
 
 Compose variants forward `ODYSSEUS_TTS_CACHE_MAX_BYTES`, defaulting in the service to 500 MiB, and run the mounted `scripts/migrate_searxng_settings.py` helper so retained SearXNG YAML gains default inheritance without replacement. The helper preserves file metadata and formatting where possible and writes atomically; migration failure is non-fatal to the wrapper command. MCP OAuth callback setup follows `OAUTH_REDIRECT_BASE_URL`, `APP_PUBLIC_URL`, or the launcher/bind `APP_PORT`, so externally remapped deployments should set a public base explicitly.
 

@@ -110,7 +110,7 @@ add provider calls or turn missing evidence into extra provider rounds.
 Lab's server-owned authority remains narrower than inventory or availability.
 Transcription, OCR, tasks, browser fallback, request-specific capability
 selection, compact contracts, and provider-compatible tool choice retain the
-canonical implementation. Model ID `Ajax` selects the Odysseus compact profile;
+canonical implementation. Model ID `Ajax` selects the Cereysus compact profile;
 its selected schema boundary survives compatible `auto` tool choice, explicit
 no-tools remains explicit, and transport remains OpenAI-compatible. No
 benchmark-runner code was independently edited or executed.

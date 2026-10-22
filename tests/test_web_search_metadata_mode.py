@@ -93,7 +93,7 @@ def test_scholarly_metadata_query_skips_full_page_fetch(monkeypatch):
                 "Formal publication: IEEE/CVF Conference on Computer Vision "
                 "and Pattern Recognition (CVPR), 2025."
             ),
-            "source": "openalex",
+            "source": "searxng",
         }]
 
     monkeypatch.setattr(search, "searxng_search_results", _summary_search)

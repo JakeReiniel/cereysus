@@ -2771,6 +2771,7 @@ async def action_check_email_urgency(owner: str, **kwargs) -> Tuple[str, bool]:
                             # scanner from labelling its own emails "urgent".
                             if (_ody_origin == "odysseus-ui" or _ody_kind == "reminder"
                                     or _raw_subj.startswith("reminder (odysseus):")
+                                    or _raw_subj.startswith("reminder (cereysus):")
                                     or _raw_subj.startswith("reminder:")
                                     or _raw_subj.startswith("[task]")):
                                 # Drop this candidate entirely — don't list it

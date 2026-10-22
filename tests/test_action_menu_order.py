@@ -149,7 +149,8 @@ def test_email_auto_reply_syncs_one_calendar_event_per_account() -> None:
     assert "function _syncAutoReplyCalendarEvent(cfg)" in source
     assert "summary: 'Email Auto Reply (away)'" in source
     assert "function _findAutoReplyCalendarEventUids(cfg, accountId)" in source
-    assert "Odysseus email auto reply - account:" in source
+    assert "Cereysus email auto reply - account:" in source
+    assert "Odysseus email auto reply - account:" in source  # legacy marker, matched on purpose
     assert "_AUTO_REPLY_CALENDAR_KEY_PREFIX" in source
     assert "method: 'POST', body: JSON.stringify(payload)" in source
     assert "method: 'PUT', body: JSON.stringify(payload)" in source

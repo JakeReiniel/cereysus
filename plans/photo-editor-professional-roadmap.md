@@ -1,16 +1,16 @@
-# Plan: Odysseus Professional Photo Editor
+# Plan: Cereysus Professional Photo Editor
 
-> Source PRD: Conversation goal, "a Photoshop/Photopea clone with Odysseus style"
+> Source PRD: Conversation goal, "a Photoshop/Photopea clone with Cereysus style"
 
 ## Product boundary
 
-Odysseus should provide the editing loop people expect from a professional
+Cereysus should provide the editing loop people expect from a professional
 layer-based photo editor without copying Photoshop's visual design or trying to
 match every specialist feature. The target is a dependable browser editor for
 real photo work: direct manipulation, non-destructive layers, precise masking,
 retouching, typography, export, recovery, and optional AI assistance.
 
-The existing quiet Odysseus interface remains the visual language. Dense tools
+The existing quiet Cereysus interface remains the visual language. Dense tools
 are acceptable, but controls should stay restrained, compact, predictable, and
 usable on both desktop and touch devices.
 
@@ -34,9 +34,9 @@ The current editor already provides meaningful parts of this product:
 
 Durable decisions that apply across every phase:
 
-- **Editor ownership**: The editor remains an Odysseus feature. Do not embed a
+- **Editor ownership**: The editor remains a Cereysus feature. Do not embed a
   third-party editor or imitate another product's chrome.
-- **Document format**: Continue the versioned Odysseus editor document. Every
+- **Document format**: Continue the versioned Cereysus editor document. Every
   new persistent capability requires a migration, validation, round-trip test,
   and corrupt-input recovery behavior.
 - **Layer model**: Grow the document into explicit layer kinds rather than
@@ -128,7 +128,7 @@ touch. I can see exact values, snap precisely, and never lose a drag at the edge
 Use a unified pointer session with pointer capture, live modifiers, and a small
 contextual transform readout. Add accurate rotated-frame interior hit testing,
 keyboard nudging, frame snapping, and clear Apply/Cancel behavior. Keep the
-existing compact Odysseus styling and make the numeric popup a precision surface
+existing compact Cereysus styling and make the numeric popup a precision surface
 rather than a competing transform implementation.
 
 ### Acceptance criteria
@@ -320,7 +320,7 @@ effect presets.
 
 ---
 
-## Phase 12: Odysseus Professional Workspace
+## Phase 12: Cereysus Professional Workspace
 
 **User stories**: I can work quickly without fighting floating windows or losing
 the active tool, layer, selection, or document context.
@@ -330,7 +330,7 @@ the active tool, layer, selection, or document context.
 Refine the existing shell into a consistent professional workspace: contextual
 tool options, properties inspector, panel persistence, command search, status
 information, multi-document switching, and compact touch sheets. Preserve the
-current Odysseus palette, typography, restrained borders, and frosted surfaces.
+current Cereysus palette, typography, restrained borders, and frosted surfaces.
 
 ### Acceptance criteria
 
@@ -345,13 +345,13 @@ current Odysseus palette, typography, restrained borders, and frosted surfaces.
 
 ## Phase 13: File Interchange And Export
 
-**User stories**: I can bring common assets into Odysseus and export predictable
+**User stories**: I can bring common assets into Cereysus and export predictable
 results without losing transparency, dimensions, or color intent.
 
 ### What to build
 
 Strengthen image import/export first, then add layered interchange where a
-maintained parser makes it safe. Keep Odysseus project files as the lossless
+maintained parser makes it safe. Keep Cereysus project files as the lossless
 source of truth and clearly report what an external format cannot preserve.
 
 ### Acceptance criteria

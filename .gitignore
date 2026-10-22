@@ -123,3 +123,9 @@ compound.config.json
 *.error.log
 _scratch/
 /odysseus/
+
+# Cereysus: never commit model weights or local model folders
+*.gguf
+*.safetensors
+*.ckpt
+/models/

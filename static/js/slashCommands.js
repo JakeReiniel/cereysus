@@ -1223,7 +1223,7 @@ async function _cmdToggleIncognito(args, ctx) {
   const sessions = sessionModule.getSessions();
   const sess = ctx.sid ? sessions.find(s => s.id === ctx.sid) : null;
   if (sess && sess.message_count > 0) {
-    slashReply(`Can't toggle Nobody mode mid-conversation — start a new session first`);
+    slashReply(`Can't toggle Incognito mode mid-conversation — start a new session first`);
     return true;
   }
   const v = (args[0]||'').toLowerCase();
@@ -2529,7 +2529,7 @@ async function _cmdDemo(args, ctx) {
     const step = steps[i];
     if (step.before) step.before();
     const res = await showStep(step.sel, step.text, step.mode || 'next', i === 0, step);
-    if (res === 'cancel') { _clearTour(); return true; }
+    if (res === 'cancel') { _clearTour(); if (step.finishLabel) { await typewriterReply('Cereysus is yours to explore, enjoy the journey!'); } return true; }
     if (res === 'back') { if (i > 0) i--; continue; }
     i++;
     // Breather between steps so the tour doesn't feel like it's racing ahead.
@@ -5275,16 +5275,16 @@ async function _cmdShortcuts(args, ctx) {
 // ── Easter eggs ──
 
 const _ODYSSEY_QUOTES = [
-  "Tell me, O Muse, of that ingenious hero who travelled far and wide...",
-  "Of all creatures that breathe and move upon the earth, nothing is bred that is weaker than man.",
-  "There is a time for many words, and there is also a time for sleep.",
-  "Even his griefs are a joy long after to one that remembers all that he wrought and endured.",
-  "Be strong, saith my heart; I am a soldier; I have seen worse sights than this.",
-  "There is nothing more admirable than when two people who see eye to eye keep house as man and wife.",
-  "A man who has been through bitter experiences and travelled far enjoys even his sufferings after a time.",
-  "For a friend with an understanding heart is worth no less than a brother.",
-  "The wine urges me on, the bewitching wine, which sets even a wise man to singing and to laughing gently.",
-  "I am Odysseus, son of Laertes, known to all for my cunning. My fame reaches even unto heaven.",
+  "Measure twice, pour once.",
+  "A structure is only as strong as its weakest connection.",
+  "Every great span begins with one well-placed footing.",
+  "Good engineering is invisible until the day it is needed.",
+  "Gravity never takes a day off, so design for it every day.",
+  "Safety factors are how we plan for what we cannot predict.",
+  "Build it simple, build it strong, build it to last.",
+  "A mistake on paper costs pennies; a mistake in concrete costs fortunes.",
+  "Check the load path, then check it again.",
+  "The best bridge is the one nobody has to worry about.",
 ];
 
 const _8BALL = [
@@ -5420,7 +5420,7 @@ async function _cmdOdyssey(args, ctx) {
   const q = _ODYSSEY_QUOTES[Math.floor(Math.random() * _ODYSSEY_QUOTES.length)];
   _eggRender(`<div style="max-width:420px;border-left:3px solid var(--red);padding:8px 16px;animation:egg-fade 0.5s ease-out">
     <div style="font-style:italic;line-height:1.6;opacity:0.9">${q}</div>
-    <div style="margin-top:8px;font-size:0.8em;opacity:0.4">Homer, The Odyssey</div>
+    <div style="margin-top:8px;font-size:0.8em;opacity:0.4">Cereysus, civil engineer</div>
   </div>`);
   if (!document.getElementById('egg-styles')) { const s=document.createElement('style');s.id='egg-styles';s.textContent='@keyframes egg-spin{0%{transform:rotateY(0) scale(0.5);opacity:0}50%{transform:rotateY(540deg) scale(1.2)}100%{transform:rotateY(720deg) scale(1)}} @keyframes egg-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}} @keyframes egg-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';document.head.appendChild(s); }
   return true;
@@ -6156,7 +6156,7 @@ const COMMANDS = {
   roll:    { alias: ['dice', 'r'],  hidden: true, handler: _cmdRoll,    usage: '/roll [NdN|sides]' },
   '8ball': { alias: ['8-ball'],     hidden: true, handler: _cmd8Ball,   usage: '/8ball question' },
   fortune: { alias: ['cookie'],     hidden: true, handler: _cmdFortune, usage: '/fortune' },
-  odyssey: { alias: ['homer','quote'],hidden: true, handler: _cmdOdyssey,usage: '/odyssey' },
+  odyssey: { alias: ['blueprint','quote'],hidden: true, handler: _cmdOdyssey,usage: '/odyssey' },
   ascii:   { alias: ['banner'],     hidden: true, handler: _cmdAscii,   usage: '/ascii [text]' },
   matrix:  { alias: [],             hidden: true, handler: _cmdMatrix,  usage: '/matrix' },
   cowsay:  { alias: ['moo', 'say'], hidden: true, handler: _cmdSay,     usage: '/cowsay [text]' },

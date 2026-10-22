@@ -747,12 +747,12 @@ export function processWithThinking(text) {
  */
 function svgThemeCss() {
   const defaults = {
-    '--bg': '#282c34',
-    '--panel': '#111111',
-    '--fg': '#9cdef2',
-    '--border': '#355a66',
-    '--accent': '#e06c75',
-    '--muted': '#888888',
+    '--bg': '#1B1B3A',
+    '--panel': '#252441',
+    '--fg': '#E6E9F2',
+    '--border': '#2E2D55',
+    '--accent': '#2EC4CF',
+    '--muted': '#B8BFCF',
     '--success': '#4caf50',
     '--warning': '#f0ad4e',
   };

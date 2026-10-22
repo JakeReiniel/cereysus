@@ -1,13 +1,13 @@
-# Contributing to Odysseus
+# Contributing to Cereysus
 
 Thanks for helping. The project is moving quickly, so the best contributions are focused, easy to review, and easy to test.
 
 ## Branch model
 
-Odysseus has two branches:
+Cereysus has two branches:
 
 - **`dev`** — where all PRs land. Things can be in flux here; the merge button gets used freely.
-- **`main`** — what users run. Curated and tested by the release's [Release Maintainer](docs/maintainers/testing-and-releases.md#release-ownership). Fast-forwarded to a stable `dev` commit at each release.
+- **`main`** — what users run. Curated and tested by the maintainer. Fast-forwarded to a stable `dev` commit at each release.
 
 **Open your PR against `dev`, not `main`.** The GitHub "base" dropdown defaults to `dev`. If you opened a PR against `main` by accident, click "Edit" on the PR and change the base — no rebase needed.
 
@@ -62,10 +62,6 @@ docker compose logs --tail=120 odysseus
 
 Mention what you ran in the pull request description. If you could not run a check, say so.
 
-## Maintainer governance and review guidance
-
-For repository roles, product decisions, risk-based approvals, issue triage, independent security reviews, CodeQL findings, and release handoffs, see the [Odysseus maintainer handbook](docs/maintainers/README.md). This complements the contributor requirements below and does not change the branch model or current PR template.
-
 ## Pull Requests
 
 Good pull requests usually include:
@@ -82,7 +78,7 @@ Please keep PRs small. Large PRs that mix unrelated cleanup, formatting, refacto
 
 ## Style and visual changes
 
-Odysseus has an intentional visual style. PRs that ignore it will be closed without merge, no matter how correct the underlying code is.
+Cereysus has an intentional visual style. PRs that ignore it will be closed without merge, no matter how correct the underlying code is.
 
 Before submitting any change that affects what the app looks like — buttons, icons, fonts, colors, spacing, layout, CSS, HTML, SVG, or any `static/js/` module that draws to the DOM — please:
 

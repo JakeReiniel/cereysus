@@ -2654,7 +2654,7 @@ function initializeEventListeners() {
       chk.checked = !chk.checked;
       incognitoBtn.classList.toggle('active', chk.checked);
       const tipEl = el('welcome-tip');
-      incognitoBtn.title = chk.checked ? 'Disable Nobody mode' : 'Enable Nobody mode — no memory or skill injection, no history saved';
+      incognitoBtn.title = chk.checked ? 'Disable Incognito mode' : 'Enable Incognito mode — no memory or skill injection, no history saved';
       const welcomeName = document.querySelector('.welcome-name');
       if (chk.checked) {
         try {
@@ -2662,7 +2662,7 @@ function initializeEventListeners() {
           const box = el('chat-history');
           if (box) box.innerHTML = '';
         } catch (_) {}
-        incognitoBtn.innerHTML = INCOGNITO_EYE_CLOSED + '<span class="incognito-label">Nobody</span>';
+        incognitoBtn.innerHTML = INCOGNITO_EYE_CLOSED + '<span class="incognito-label">Incognito</span>';
         if (welcomeName) {
           welcomeName.dataset.originalHtml = welcomeName.innerHTML;
           welcomeName.innerHTML = '<svg class="welcome-boat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><line x1="8" y1="16" x2="16" y2="8"/><line x1="8" y1="8" x2="16" y2="16"/></svg>Nobody';
@@ -2687,7 +2687,7 @@ function initializeEventListeners() {
         }
         // Default to plain chat: disable tools visually, switch to chat mode.
         // IMPORTANT: don't overwrite the user's persisted per-mode tool prefs
-        // (`web_agent`, `bash_agent`, `web_chat`, `bash_chat`). Nobody mode is
+        // (`web_agent`, `bash_agent`, `web_chat`, `bash_chat`). Incognito mode is
         // ephemeral — their agent-mode defaults must come back on toggle-off.
         const beforeNobody = Storage.getJSON(Storage.KEYS.TOGGLES, {}) || {};
         if (!beforeNobody.nobody_prev_mode) beforeNobody.nobody_prev_mode = beforeNobody.mode || 'agent';
@@ -2717,7 +2717,7 @@ function initializeEventListeners() {
         ts.research = false;
         Storage.setJSON(Storage.KEYS.TOGGLES, ts);
       } else {
-        incognitoBtn.innerHTML = INCOGNITO_EYE_OPEN + '<span class="incognito-label">Nobody</span>';
+        incognitoBtn.innerHTML = INCOGNITO_EYE_OPEN + '<span class="incognito-label">Incognito</span>';
         if (welcomeName && welcomeName.dataset.originalHtml) {
           welcomeName.innerHTML = welcomeName.dataset.originalHtml;
           // Restart the L→R clip-wipe reveal on the restored label

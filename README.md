@@ -1,9 +1,13 @@
 <p align="center">
-  <img src="assets/branding/odysseus-wordmark.png" alt="Odysseus" width="238">
+  <img src="assets/branding/cereysus/cereysus-wordmark.png" alt="Cereysus" width="238">
 </p>
 
 <p align="center">
   A self-hosted AI workspace for chat, agents, research, documents, email, notes, calendar, and local model workflows.
+</p>
+
+<p align="center">
+  <sub>Cereysus is a modified fork of <a href="https://github.com/odysseus-dev/odysseus">Odysseus</a>, licensed under the GNU AGPL-3.0-or-later. See <a href="NOTICE-CEREYSUS.md">NOTICE-CEREYSUS.md</a>.</sub>
 </p>
 
 <p align="center">
@@ -105,3 +109,5 @@ Deployment details are in the [setup guide](website/setup.md#security-notes).
 ## License
 
 AGPL-3.0-or-later -- see [LICENSE](LICENSE) and [ACKNOWLEDGMENTS.md](ACKNOWLEDGMENTS.md).
+
+Cereysus is a modified version of Odysseus (https://github.com/odysseus-dev/odysseus), licensed under the GNU AGPL-3.0-or-later. Modifications (c) 2026 Cereysus. See [NOTICE-CEREYSUS.md](NOTICE-CEREYSUS.md).

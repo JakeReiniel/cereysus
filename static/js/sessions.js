@@ -66,7 +66,7 @@ function _forceExitIncognitoUi() {
   const btn = document.getElementById('incognito-btn');
   if (btn) {
     btn.classList.remove('active');
-    btn.title = 'Enable Nobody mode — no memory or skill injection, no history saved';
+    btn.title = 'Enable Incognito mode — no memory or skill injection, no history saved';
     btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span class="incognito-label">Nobody</span>';
   }
 
@@ -2511,7 +2511,7 @@ export async function materializePendingSession() {
     const incognitoChk = document.getElementById('incognito-toggle');
     const isIncognito = incognitoChk && incognitoChk.checked;
     const base = (pending.modelId || 'model').split('/').pop();
-    const name = isIncognito ? 'Nobody' : `${base} ${new Date().toLocaleTimeString()}`;
+    const name = isIncognito ? 'Incognito' : `${base} ${new Date().toLocaleTimeString()}`;
 
     const fd = new FormData();
     fd.append('name', name);
